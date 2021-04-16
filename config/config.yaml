@@ -2,7 +2,7 @@ general:
   delete_after_record: true #If you don't want to delete files from output folder, change to false.\
   #Deleteing files from output folder doesn't delete them from IPFS
 transaction:
-  path_to_robonomics_file: "" #where lies the binary file, ends with a binary filename. It's used to listen to network and sending datalogs
+  path_to_robonomics_file: "" #where lies the binary file, ends with a binary filename. It's used to listen to network and sending datalog
   remote: '' #e.g. '--remote ws://127.0.0.1:9944'. Specify remote web socket to some node.\
   #If you are to use local network, leave empty
 camera:
@@ -13,14 +13,14 @@ camera:
   key: '' #secret seed (key) in parachain network
 print_qr:
   enable: true #If you use a printer and want to print a qr code
-  logos: true #if you want logos on left and right sides of a qr. Should be square pics. By default there is an example
+  logos: true #if you want logos on left and right sides of a qr. Should be square pics. By default, there is an example
 yourls:
   server: '' #visit yourls.org for more info
   username: ''
   password: ''
 intro:
   enable: true #If you want to attach an intro video to the main vid. Intro should be placed in media/intro.mp4. It should have the same
-  # framerate, resolution, etc as camera video. By default there is a sample intro.
+  # framerate, resolution, etc as camera video. By default, there is a sample intro.
 pinata:
   enable: true #If you want to send your video to pinning service. You should have an account on pinata.cloud
   pinata_api: ""
