@@ -2,3 +2,4 @@ modules/__pycache__
 __pycache__
 config/config_pi.yaml
 media/intro.mp4
+/venv/

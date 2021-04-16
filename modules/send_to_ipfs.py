@@ -97,11 +97,11 @@ def send(filename: str, keyword: str, qrpic: str, config: dict, dirname: str) ->
         try:
             client = ipfshttpclient.connect()  # establish connection to local ipfs node
             res = client.add(filename)  # publish vide locally
-            hash = res["Hash"]  # get its hash of form Qm....
-            logging.warning("Published to IPFS, hash: " + hash)
-            update_url(keyword, hash, config)  # after publishing file in ipfs locally, which is pretty fast, update
-            # the link on the qr code so that it redirects now to the gateway with a published file. It may take some
-            # for the gateway node to find the file, so we need to pin it in pinata
+            ipfs_hash = res["Hash"]  # get its hash of form Qm....
+            logging.warning("Published to IPFS, hash: " + ipfs_hash)
+            update_url(keyword, ipfs_hash, config)  # after publishing file in ipfs locally, which is pretty fast,
+            # update the link on the qr code so that it redirects now to the gateway with a published file. It may
+            # take some for the gateway node to find the file, so we need to pin it in pinata
             if config["pinata"]["enable"]:
                 logging.warning("Camera is sending file to pinata")
                 _pin_to_pinata(filename, config)  # pin file in pinata if needed
@@ -125,7 +125,7 @@ def send(filename: str, keyword: str, qrpic: str, config: dict, dirname: str) ->
     if config["datalog"]["enable"] and config["ipfs"]["enable"]:
         try:
             program = (
-                'echo \"' + hash + '\" | '  # send ipfs hash
+                'echo \"' + ipfs_hash + '\" | '  # send ipfs hash
                 + config["transaction"]["path_to_robonomics_file"] + " io write datalog "  # to robonomics chain
                 + config["transaction"]["remote"]  # specify remote wss, if calling remote node
                 + " -s "

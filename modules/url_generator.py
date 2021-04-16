@@ -36,12 +36,12 @@ def create_url(config: dict) -> Tuple[Any, Any]:
         return "55", "url.today/55"  # time to time creating url fails. To go on just set a dummy url and keyword
 
 
-def update_url(keyword: str, hash: str, config: dict) -> None:
+def update_url(keyword: str, ipfs_hash: str, config: dict) -> None:
     """
     :param keyword: shorturl keyword. More on yourls.org. E.g. url.today/6b. 6b is a keyword
     :type keyword: str
-    :param hash: IPFS hash of a recorded video
-    :type hash: str
+    :param ipfs_hash: IPFS hash of a recorded video
+    :type ipfs_hash: str
     :param config: dictionary containing all the configurations
     :type config: dict
 
@@ -54,7 +54,7 @@ def update_url(keyword: str, hash: str, config: dict) -> None:
             "password": config["yourls"]["password"],
             "action": "update",
             "format": "json",
-            "url": "http://gateway.ipfs.io/ipfs/" + hash,
+            "url": "http://gateway.ipfs.io/ipfs/" + ipfs_hash,
             "shorturl": keyword,
         }
         payload = ""  # another api call with no payload just to update the link. More on yourls.org. Call created with

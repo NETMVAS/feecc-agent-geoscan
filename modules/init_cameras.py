@@ -14,7 +14,7 @@ class Camera:
         self.qrpic = None  # future path to qr-code picture file. This will be used to create a labels
         self.keyword = None  # shorturl keyword. More on yourls.org. E.g. url.today/6b. 6b is a keyword
         self.ip = config["camera"]["ip"]  # dictionary containing all the configurations
-        self.port = config["camera"]["port"]  # port where the camera streams, required for rstp
+        self.port = config["camera"]["port"]  # port where the camera streams, required for rtsp
         self.login = config["camera"]["login"]  # camera login to obtain access to the stream
         self.password = config["camera"]["password"]  # camera password to obtain access to the stream
 
@@ -33,7 +33,7 @@ class Camera:
                 dirname + "/output/" + time.ctime(time.time()).replace(" ", "_") + ".mp4"
         )  # new video filepath. It is to be saved in a separate directory with a timestamp
         self.program_ffmpeg = (
-                'ffmpeg -rtsp_transport tcp -i "rtsp://'  # using rstp to get stream
+                'ffmpeg -rtsp_transport tcp -i "rtsp://'  # using rtsp to get stream
                 + self.login
                 + ":"
                 + self.password
