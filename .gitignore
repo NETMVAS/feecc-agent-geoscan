@@ -3,3 +3,5 @@ __pycache__
 config/config_pi.yaml
 media/intro.mp4
 /venv/
+passports
+*.log
