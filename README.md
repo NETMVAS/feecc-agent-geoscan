@@ -1,109 +1,206 @@
-# Cameras for Transparent Production Under Robonomics Parachain Control
+# Robonomics QA architecture
 
-## This repository is an example of using Robonomics tools with single-board computer, IP camera and label printer to demonstrate providing trustworthy production surveillance
+## Содержание
 
-### Record video, store it in IPFS and send hash to blockchain. Optionally print sticky label with qr-code link to pinned video
+[TOC]
 
-**Used hardware**
-- [RaspberryPi4](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/) 2 GB with **Ubuntu 20.04** installed;
-- IP camera Hikvision HiWatch DS-I200C + power supply/PoE injector;
-- Label printer [Brother QL-800](https://www.brother.ru/labelling-and-receipts/ql-800);
-- _Optional_: Wi-Fi router [Mikrotik RB941-2nD](https://mikrotik.com/product/RB941-2nD) for scalability (e.g. add more cameras), remote access or stable Wi-Fi connection;
-- Tumbler for triggering recording. Generally, GPIO may be used with other hardware.
+## Субъекты системы
+Система представляет собой набор из двух микросервисов (Agent, Backend), разворачиваемых  в Docker контейнерах и общающихся друг с другом посредством Rest API.
 
-**Used services**
-- [Pinata](https://pinata.cloud/) as a pinning service to widely spread video over IPFS;
-- [YOURLS](https://yourls.org/) to print qr-codes with short predefined links.
+### Агент
+Демон, отвечающий за работу со всем оборудованием (камера, RFID-reader) и взаимодействие с IPFS, Pinata, Robonomics. Авторизует работника, формирует паспорта изделий. Имеет Rest API интерфейс, на который присылает запросы бекенд. Отсылает запросы на API интерфейс бекенда.
 
-**Used software.** *This is to be installed on RaspberryPi4, connection to which may be established by [yggdrasil](https://yggdrasil-network.github.io/) + [ssh](https://phoenixnap.com/kb/ssh-to-connect-to-remote-server-linux-or-windows)*
+### Frontend
+Веб страница, которая отображается на экране у работника. Загружается с бекенда в браузере локально. Позволяет выбирать модель изделия и дополнительные опции. Отображает статус системы. Получает состояние системы с бекенда с помощью long polling и отправляет на него данные с помощью POST запросов.
 
-- [Python 3](https://docs.python-guide.org/starting/install3/linux/);
-- Robonomics binary file (download latest release [here](https://github.com/airalab/robonomics/releases));
-- [FFMPEG](https://ffmpeg.org)
-```bash
-sudo apt install ffmpeg
-```
-- [IPFS](https://ipfs.io/):
-```bash
-wget https://dist.ipfs.io/go-ipfs/v0.6.0/go-ipfs_v0.6.0_linux-arm.tar.gz
-tar -xvf go-ipfs_v0.6.0_linux-arm.tar.gz
-rm go-ipfs_v0.6.0_linux-amd64.tar.gz go-ipfs_v0.6.0_linux-arm.tar.gz
-sudo ./go-ipfs/install.sh
-rm -rf go-ipfs
-```
-Add it as a [service](https://github.com/ipfs/go-ipfs/issues/1430). Don't forget `Environment=IPFS_PATH=/home/pi/.ipfs`
-```bash
-ipfs init
-```
-- [RPi.GPIO](https://pypi.org/project/RPi.GPIO/)
-```bash
-sudo apt-get -y install python3-rpi.gpio
-sudo usermod -G dialup -a $USER
-```
-- [brother_ql](https://brother-ql.net/) software
-```bash
-pip3 install brother_ql
-sudo usermod -G lp -a $USER
-#reboot
-sudo reboot
-```
-- [Robonomics](https://github.com/airalab/robonomics/releases/tag/v0.24.0)
-```
-chmod +x robonomics
-```
+### Backend
+Имеет Rest API интерфейс, на который присылает запросы фронтенд, обеспечивает взаимодействие агента и фронтенда. Проксирует запросы от фронтенда на агент. Хранит состояние агента и транслирует его фронтенду, пока агент не пришлет запрос на изменение своего состояния через Rest API.
 
-## Preparations
-1) Install [Ubuntu 20.04] on RaspberryPi4;
-2) Install all the software;
-4) Set up IP camera. It should have a static IP to put it in configuration file. HD quality is recommended for less file size. Feel free to adjust OSD info. You may need windows to set it up for Hikvision;
-5) Set up YOURLS server;
-6) Set up a printer. For this case, you can follow [this manual](https://www.rs-online.com/designspark/building-a-pi-powered-wireless-label-printer)
-7) Solder a tumbler to 5V (PIN4), GND(PIN6) and GPIO18 (PIN12) (in this example) pins on Raspberry Pi;
+## Состояния систем
+Система работает по принципу автомата, который имеет 4 состояния, синхронизированных для всех субъектов.
 
-![Raspberry](https://github.com/PaTara43/media/blob/master/Raspberry%20pi%203%20GPIO_pins_v2.png "Raspberry")
+<table>
+  <tr>
+   <td><strong>STATE</strong>
+   </td>
+   <td><strong>FRONTEND</strong>
+   </td>
+   <td><strong>BACKEND</strong>
+   </td>
+   <td><strong>AGENT</strong>
+   </td>
+  </tr>
+  <tr>
+   <td>STATE 0
+   </td>
+   <td>На экране заглушка - приложите пропуск к сканеру чтобы начать сборку изделия.
+   </td>
+   <td>Транслирует фронтенду состояние агента, ожидает от него запроса на изменение.
+   </td>
+   <td>Мониторит состояние RFID считывателя, при получении данных валидирует их, меняет свое состояние на 1, сообщает об этом на бекенд.
+   </td>
+  </tr>
+  <tr>
+   <td>STATE 1
+   </td>
+   <td>Открыта страница для ввода параметров изделия. При сабмите формы данные отправляются в json через POST запрос на бекенд, состояние меняется на 2.
+   </td>
+   <td>Ждет запроса от агента об отмене сессии (возвращает state 0 при повторном скане карты) ИЛИ ждет запрос с данными от фронтенда и передает их агенту.
+   </td>
+   <td>В фоне мониторит RFID сканер и, при получении данных, отсылает запрос об изменении состояния на бекенд, встает в STATE 0. Одновременно ждет данных об изделии от бекенда. При получении - встает в STATE 2.
+   </td>
+  </tr>
+  <tr>
+   <td>STATE 2
+   </td>
+   <td>На экране заглушка - идет запись сборки. Для завершения сессии приложить карту. Мониторит состояние бекенда, ждет изменений.
+   </td>
+   <td>Ждет запрос от агента на изменение состояния. При получении - встает в STATE 3, отправляет сигнал на изменение состояния на фронт.
+   </td>
+   <td>Записывает процесс сборки с помощью камеры. В фоне мониторит RFID сканер и, при получении данных, отсылает запрос об изменении состояния на бекенд, встает в STATE 3.
+   </td>
+  </tr>
+  <tr>
+   <td>STATE 3
+   </td>
+   <td>На экране заглушка - идет  обработка записей и печать паспорта. Мониторит состояние бекенда, ждет изменений. При получении сигнала встает в STATE 0.
+   </td>
+   <td>Транслирует STATE 3 на фронтенд, ждет запроса на смену состояния от агента. При получении - отправляет сигнал на фронтенд и встает в STATE 0.
+   </td>
+   <td>Получив карту, завершает запись. Отправляет запрос на смену состояния на STATE 3 на бекенд,  Запись выкладывается в IPFS, формируется паспорт, хеш паспорта записывается в Робономику, печатается стикер. Отправляет запрос на смену состояния на STATE 0 бекенду и сам в него встаёт. В фоне запись пинится в Pinata.
+   </td>
+  </tr>
+</table>
 
-8) If you use router, set it up to connect camera to RaspberryPi4 and connect router to the internet;
+## Схема смены состояний субъектов с течением времени под влиянием событий-тригеров
 
-## To run:
-1) Download source code and install additional python libraries:
-```bash
-git clone https://github.com/PaTara43/cameras_robonomics
-cd cameras_robonomics
-sudo pip3 install -r requirements.txt
-```
-2) Specify all the information in configuration file.
-```bash
-nano config/config.yaml
-```
-It has comments for better understanding. **Read them carefully.** All the information about creating accounts may be found [here](https://wiki.robonomics.network/docs/create-account-in-dapp/). To send transactions between accounts they should have some tokens.
+![alt_text](images/image1.png)
 
-3) Launch script
-```
-python3 main.py
-```
+## Взаимодействие субъектов системы
+Поскольку взаимодействие в системе организовано посредством REST API, бекенд и агент имеют наборы REST API endpoint’ов. Взаимодействие представлено следующей схемой:
 
-4) Now you can start and stop recording with a tumbler. May need some debugging to find out which position is ON and OFF.
+![alt_text](images/image2.png)
 
-## How it works
-Tumbler stands into ON, camera creates a short URL redirecting to nowhere (IPFS gateway with no hash), creates a qr-code with this short URL, prints the qr and starts filming. Once tumbler is switched to OFF, camera stops filming, publishes video to IPFS, changes short URL redirection link to gateway with hash address of the video and sends the video to Pinata pinning service for wider spreading over IPFS. IPFS hash of the video will be available on Robonomics platform Chainstate->datalog->CAMERA account and stored there securely.
+### Запросы
+На схеме запросы пронумерованы. Пояснение:
 
-## Auto-start
-You may want to auto-restart this script. To be able so, edit service file
-```bash
-nano services/robonomics_cameras.service
-```
-and fill it with path to python3 and the script. Don't forget to fill in username. E.g.:
-```
-ExecStart=/usr/bin/python3 /home/ubuntu/cameras_robonomics/main.py
-User=ubuntu
-```
-Then move it to `/etc/systemd/system/` and run:
-```bash
-sudo mv services/robonomics_cameras.service /etc/systemd/system/
-systemctl enable robonomics_cameras
-systemctl start robonomics_cameras
-```
-To check service status do:
-```bash
-systemctl -l status robonomics_cameras
-```
+1. GET - long polling запрос о текущем состоянии от фронтенда на бекенд. В ответ приходит JSON, содержащий одно поле - номер текущего состояния (от 0 до 3);
+2. POST - form submit. Отправляется после заполнения работником формы на фронтенде. Payload - JSON с данными из формы (модель изделия, опции и т.п.);
+3. POST - form submit. Отправляется после получения с фронтенда данных формы. Payload - JSON с данными из формы (модель изделия, опции и т.п.), пересылается агенту без изменений для использования в формировании тех. паспорта изделия;
+4. POST - Запрос о смене состояния. Payload - JSON, содержащий номер нового состояния (от 0 до 3). Работает в оба направления между агентом и бекендом.
+
+### REST API endpoints
+Приведенным выше запросам соответствуют следующие эндпоинты и содержимое. Нумерация соответствует схеме.
+
+<table>
+  <tr>
+    <td>
+      <strong>№
+      </strong>
+    </td>
+    <td>
+      <strong>TYPE
+      </strong>
+    </td>
+    <td>
+      <strong>ENDPOINT
+      </strong>
+    </td>
+    <td>
+      <strong>JSON PAYLOAD
+      </strong>
+    </td>
+  </tr>
+  <tr>
+    <td>1
+    </td>
+    <td>GET
+    </td>
+    <td>
+      <code>/state
+      </code>
+    </td>
+    <td>
+      <code>
+        REQUEST: None 
+        RESPONSE:  
+        {
+        "state_no": 0 }
+        INFO: state_no: int от 0 до 3 - номер текущего состояния (см. "Состояния систем")
+      </code>
+    </td>
+  </tr>
+  <tr>
+    <td>2
+    </td>
+    <td>POST
+    </td>
+    <td>
+      <code>/form-handler
+      </code>
+    </td>
+    <td>
+      <code>
+        REQUEST:  
+        { 
+        "session_start_time": "01-01-1970 00:00:00", 
+        "product_type": "Perseverance Mars rover", 
+        "additional_info": [ 
+        "field_1": "Sample text", 
+        "field_2": "Sample text", 
+        "field_3": "Sample text" 
+        ] 
+        } 
+        RESPONSE: HTTP status code
+      </code>
+    </td>
+  </tr>
+  <tr>
+    <td>3
+    </td>
+    <td>POST
+    </td>
+    <td>
+      <code>/form-handler
+      </code>
+    </td>
+    <td>
+      <code>
+        REQUEST:  
+        { 
+        "session_start_time": "01-01-1970 00:00:00", 
+        "product_type": "Perseverance Mars rover", 
+        "additional_info": [ 
+        "field_1": "Sample text", 
+        "field_2": "Sample text", 
+        "field_3": "Sample text" 
+        ] 
+        } 
+        RESPONSE: HTTP status code
+      </code>
+    </td>
+  </tr>
+  <tr>
+    <td>4
+    </td>
+    <td>POST
+    </td>
+    <td>
+      <code>/state-update
+      </code>
+    </td>
+    <td>
+      <code>
+        REQUEST:  
+        { 
+        "change_state_to": 1, 
+        "priority": 1, 
+        } 
+        RESPONSE: HTTP status code
+        INFO: change_state_to: int от 0 до 3 - номер нового состояния (см. "Состояния систем")
+        priority: int от 1 до 2 - приоритет операции. Таким образом, если бекенд получит сразу 2 запроса о смене состояния, то
+        предпочтение будет отдано команде от агента, т. к. она имеет приоритет 1, а команды фронтенда - 2.
+      </code>
+    </td>
+  </tr>
+</table>
