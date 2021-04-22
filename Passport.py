@@ -25,7 +25,7 @@ class Passport:
         # refuse service if employee unknown
         if not self._employee_db_entry:
             logging.error(f"Employee with ID {self._employee_id} is not in the DB, service refused")
-            return
+            raise ValueError
 
         # refuse service if employee database has wrong format
         valid_len = 3
@@ -78,6 +78,7 @@ class Passport:
             self.workplace_data = form["production_stage"]
 
             return True
+
         else:
             logging.error(f"Error validating form data. Key mismatch with reference model")
             return False

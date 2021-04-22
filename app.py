@@ -1,7 +1,6 @@
 from flask import Flask, request, Response
 from flask_restful import Api, Resource
 import typing as tp
-import requests
 import logging
 
 from Agent import Agent
@@ -21,24 +20,11 @@ backend_api_address: str = "http://127.0.0.1:5000/api"
 valid_states = [0, 1, 2, 3]
 
 # instantiate objects
+passport = Passport("foo")
 agent = Agent()
+agent.backend_api_address = backend_api_address
 app = Flask(__name__)
 api = Api(app)
-
-
-def update_backend_state(priority: int) -> int:
-    """post an updated system state to the backend to keep it synced with the local state"""
-
-    logging.info(f"Changing backend state to {agent.state}")
-    change_backend_state = requests.post(
-        url=f"{backend_api_address}/state-update",
-        json={
-            "change_state_to": agent.state,
-            "priority": priority
-        }
-    )
-
-    return change_backend_state.status_code
 
 
 # REST API request handlers
@@ -54,23 +40,22 @@ class FormHandler(Resource):
         form_data = request.get_json()
 
         global agent
-        passport = Passport()
+        global passport
 
-
-        # todo
         # validate the form and change own state
         if passport.submit_form(form_data):
             agent.state = 2
-            update_backend_state(priority=1)
 
             logging.info(
                 f"Form validation success. Current state: {agent.state}"
             )
 
         else:
+            agent.state = 0
+
             logging.error(
                 f"""
-                Invalid form 
+                Invalid form, state reset to 0
                 Form: {form_data}
                 Current state: {agent.state}
                 """
@@ -114,12 +99,42 @@ class StateUpdateHandler(Resource):
         return 200
 
 
-# todo
 class RFIDHandler(Resource):
     """handles RFID scanner events"""
 
     def post(self) -> int:
-        pass
+
+        # parse RFID card ID from the request
+        card_id = request.get_json()["string"]
+
+        # log the event
+        logging.info(f"read RFID card with ID {card_id}")
+
+        # start session
+        if agent.state == 0:
+
+            # create a passport for the provided employee
+            try:
+                global passport
+                passport = Passport(card_id)
+                agent.state = 1
+
+            except ValueError:
+                logging.info(f"Passport creation failed, staying at state 0")
+
+        # cancel session
+        elif agent.state == 1:
+            agent.state = 0
+
+        # end session
+        elif agent.state == 2:
+            agent.state = 3
+
+        # ignore interaction when in state 3
+        else:
+            pass
+
+        return 200
 
 
 # REST API endpoints
