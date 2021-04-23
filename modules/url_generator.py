@@ -4,6 +4,13 @@ import requests
 
 from typing import Tuple, Any
 
+# set up logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename="agent.log",
+    format="%(asctime)s %(levelname)s: %(message)s"
+)
+
 
 def create_url(config: dict) -> Tuple[Any, Any]:
     """
@@ -32,7 +39,7 @@ def create_url(config: dict) -> Tuple[Any, Any]:
         link = config["yourls"]["server"] + "/" + keyword  # link of form url.today/6b
         return keyword, link
     except Exception as e:
-        logging.warning("Failed to create URL, replaced by url.today/55. Error: ", e)
+        logging.error("Failed to create URL, replaced by url.today/55. Error: ", e)
         return "55", "url.today/55"  # time to time creating url fails. To go on just set a dummy url and keyword
 
 
