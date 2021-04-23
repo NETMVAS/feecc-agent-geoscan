@@ -1,5 +1,14 @@
 import requests
 import logging
+from time import sleep
+import typing as tp
+
+from modules.Camera import Camera
+import modules.Printer as Printer
+import modules.send_to_ipfs as ipfs
+import modules.url_generator as url_generator
+import modules.qr_generator as qr_generator
+from Passport import Passport
 
 # set up logging
 logging.basicConfig(
@@ -12,11 +21,17 @@ logging.basicConfig(
 class Agent:
     """Handles agent's state management and high level operation"""
 
-    def __init__(self):
-        """agent is initialized with state 0"""
+    def __init__(self, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
+        """agent is initialized with state 0 and has an instance of Passport and Camera associated with it"""
 
         self.state: int = 0
+        self.config: tp.Dict[str, tp.Dict[str, tp.Any]] = config
         self.backend_api_address: str = ''
+        self.associated_passport: tp.Optional[Passport] = None
+        self.associated_camera: Camera = Camera(self.config)
+        self.latest_record_filename: str = ""
+        self.latest_record_short_link: str = ""
+        self.latest_record_qrpic_filename: str = ""
 
     def state_0(self) -> None:
         """at state 0 agent awaits for an incoming RFID event and is practically sleeping"""
@@ -29,17 +44,16 @@ class Agent:
 
         pass
 
-    # todo
     def state_2(self) -> None:
         """
         at state 2 agent is recording the work process using an IP camera and awaits an
         RFID event which would stop the recording
         """
 
-        # start the recording in the background
-        pass
+        # start the recording in the background and send the path to the video
+        self.associated_camera.stop_record = False
+        self.latest_record_filename = self.associated_camera.record(self.associated_passport.passport_id)
 
-    # todo
     def state_3(self) -> None:
         """
         then the agent receives an RFID event, recording is stopped and published to IPFS.
@@ -49,22 +63,29 @@ class Agent:
         """
 
         # stop recording and save the file
-        pass
+        self.associated_camera.stop_record = True
 
-        # publish video into IPFS
-        pass
-
-        # generate a video short link
-        pass
+        # generate a video short link (a dummy for now)
+        self.latest_record_short_link = url_generator.create_url(self.config)[1]
 
         # generate a QR code with the short link
-        pass
+        self.latest_record_qrpic_filename = qr_generator.create_qr(
+            link=self.latest_record_short_link,
+            config=self.config
+        )
 
         # print the QR code onto a sticker
-        pass
+        Printer.Task(picname=self.latest_record_qrpic_filename)
 
-        # set up a background pin operation to Pinata
-        pass
+        # publish video into IPFS and pin to Pinata
+        # update the short link to point to an actual recording
+        # todo this hangs the system, need a fix
+        ipfs.send(
+            filename=self.latest_record_filename,
+            qrpic=self.latest_record_qrpic_filename,
+            config=self.config,
+            keyword=self.latest_record_short_link.split('/')[-1]
+        )
 
         # change own state back to 0
         self.state = 0
@@ -98,6 +119,9 @@ class Agent:
 
                 # update latest known state
                 latest_state = self.state
+
+            # sleep before next update
+            sleep(0.2)
 
     def _update_backend_state(self, priority: int) -> None:
         """post an updated system state to the backend to keep it synced with the local state"""
