@@ -1,6 +1,14 @@
 import logging
-import time
 import subprocess
+import time
+from os import path
+
+# set up logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename="agent.log",
+    format="%(asctime)s %(levelname)s: %(message)s"
+)
 
 
 class Camera:
@@ -22,17 +30,27 @@ class Camera:
         self.is_busy = False  # stating that in the beginning camera is not filming
         self.stop_record = False  # no stop filming flag raised
 
-    def record(self, dirname: str) -> None:
+    def record(self, unit_uuid: str) -> str:
         """
-        :param dirname: path to the project ending with .../cameras_robonomics
-        :type dirname: str
+        :param unit_uuid: UUID of a unit passport associated with a unit, which assembly
+        process is being recorded by the camera
 
         main method to record video from camera. Uses popen and ffmpeg utility
+
+        :returns: saved video relative path
         """
-        self.filename = (
-                dirname + "/output/" + time.ctime(time.time()).replace(" ", "_") + ".mp4"
-        )  # new video filepath. It is to be saved in a separate directory with a timestamp
-        self.program_ffmpeg = (
+
+        # new video filepath. It is to be saved in a separate directory
+        # with a UUID and number in case a unit has more than one video associated with it
+        filename = f"output/unit_{unit_uuid}_assembly_video_1.mp4"
+
+        # determine a valid video name not to override an existing video
+        cnt = 1
+        while path.exists(filename):
+            filename.replace(f"video_{cnt}", f"video_{cnt + 1}")
+            cnt += 1
+
+        program_ffmpeg = (
                 'ffmpeg -rtsp_transport tcp -i "rtsp://'  # using rtsp to get stream
                 + self.login
                 + ":"
@@ -42,20 +60,22 @@ class Camera:
                 + ":"
                 + self.port
                 + '/Streaming/Channels/101" -r 25 -c copy -map 0 '
-                + self.filename
+                + filename
         )  # the entire line looks like
         # ffmpeg -rtsp_transport tcp -i "rtsp://login:password@ip:port/Streaming/Channels/101" -c copy -map 0 vid.mp4
         # more on ffmpeg.org
-        self.process_ffmpeg = subprocess.Popen(
-            "exec " + self.program_ffmpeg,
+        process_ffmpeg = subprocess.Popen(
+            "exec " + program_ffmpeg,
             shell=True,  # execute in shell
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             stdin=subprocess.PIPE,  # to get access to all the flows
         )
-        logging.warning("Started recording image")
+        logging.info(f"Started recording video '{filename}'")
         while not self.stop_record:
             continue  # camera will be recording till the flag is raised. It happens when the trigger goes in off
-        logging.warning("Stopped recording image")
+        logging.info(f"Finished recording video '{filename}'")
         time.sleep(1)  # some time to finish the process
-        self.process_ffmpeg.kill()  # kill the subprocess to liberate system resources
+        process_ffmpeg.kill()  # kill the subprocess to liberate system resources
+
+        return filename
