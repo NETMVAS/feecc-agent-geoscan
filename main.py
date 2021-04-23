@@ -5,7 +5,7 @@ import os
 import RPi.GPIO as GPIO
 import yaml
 
-from modules.init_cameras import Camera
+from modules.Camera import Camera
 from modules.listen_to_robonomics import listener
 
 
@@ -42,7 +42,7 @@ class Error(Exception):
 if __name__ == "__main__":
     dirname = os.path.dirname(os.path.abspath(__file__))  # get path ending with .../cameras_robonomics
     config = read_configuration(dirname)
-    cam = Camera(config)  # create an instance of Camera class. Class described in modules/init_cameras.py
+    cam = Camera(config)  # create an instance of Camera class. Class described in modules/Camera.py
     channel = 18  # gpio pin to be wired with button
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # rising edge

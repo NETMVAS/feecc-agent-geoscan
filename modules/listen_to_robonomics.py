@@ -5,8 +5,8 @@ from threading import Thread
 
 import RPi.GPIO as GPIO
 
-from modules.init_cameras import Camera
-from modules.link_to_printer import Task
+from modules.Camera import Camera
+from modules.Printer import Task
 from modules.qr_generator import create_qr
 from modules.send_to_ipfs import send
 from modules.url_generator import create_url
@@ -18,7 +18,7 @@ def listener(channel: int, config: dict, cam: Camera, dirname: str) -> None:
     :type channel: int
     :param config: dictionary containing all the configurations
     :type config: dict
-    :param cam: an instance of a class, containing all its parameters and methods specified in init_cameras.py
+    :param cam: an instance of a class, containing all its parameters and methods specified in Camera.py
     :type cam: Camera
     :param dirname: path to the project ending with .../cameras_robonomics
     :type dirname: str
@@ -80,7 +80,7 @@ def listener(channel: int, config: dict, cam: Camera, dirname: str) -> None:
 
 def start_record_cam(cam: Camera, dirname: str) -> None:
     """
-    :param cam: an instance of a class, containing all its parameters and methods specified in init_cameras.py
+    :param cam: an instance of a class, containing all its parameters and methods specified in Camera.py
     :type cam: Camera
     :param dirname: path to the project ending with .../cameras_robonomics
     :type dirname: str
@@ -109,7 +109,7 @@ def stop_record_cam(filename: str, keyword: str, qrpic: str, config: dict, dirna
 
 def create_url_r(cam: Camera, dirname: str, config: dict) -> None:
     """
-    :param cam: an instance of a class, containing all its parameters and methods specified in init_cameras.py
+    :param cam: an instance of a class, containing all its parameters and methods specified in Camera.py
     :type cam: Camera
     :param dirname: path to the project ending with .../cameras_robonomics
     :type dirname: str
@@ -121,4 +121,4 @@ def create_url_r(cam: Camera, dirname: str, config: dict) -> None:
     cam.qrpic = create_qr(dirname, cam.link, config)  # create qr-code encoding the short url from yourls.
     # More in qr_generator.py
     if config["print_qr"]["enable"]:
-        Task(cam.qrpic)  # print the qr-code. more in link_to_printer.py
+        Task(cam.qrpic)  # print the qr-code. more in Printer.py
