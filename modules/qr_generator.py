@@ -4,10 +4,8 @@ import time
 from PIL import Image, ImageOps
 
 
-def create_qr(dirname: str, link: str, config: dict) -> str:
+def create_qr(link: str, config: dict) -> str:
     """
-    :param dirname: path to the project ending with .../cameras_robonomics
-    :type dirname: str
     :param link: full yourls url. E.g. url.today/6b
     :type link: str
     :param config: dictionary containing all the configurations
@@ -18,7 +16,7 @@ def create_qr(dirname: str, link: str, config: dict) -> str:
     This is a qr-creating submodule. Inserts a robonomics logo inside the qr and adds logos aside if required
     """
     inpic_s = 100  # size of robonomics logo in pixels
-    robonomics = Image.open(dirname + "/media/robonomics.jpg").resize(
+    robonomics = Image.open("media/robonomics.jpg").resize(
         (inpic_s, inpic_s)  # resize logo if it's not the demanded size
     )
     qr_big = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
@@ -41,15 +39,15 @@ def create_qr(dirname: str, link: str, config: dict) -> str:
     img_qr_big = img_qr_big.crop((left, top, right, bottom))  # crop top and bottom borders to make image rectangular
 
     if config["print_qr"]["logos"]:
-        left_pic = Image.open(dirname + "/media/left_pic.jpg").resize((qr_s, qr_s))
+        left_pic = Image.open("media/left_pic.jpg").resize((qr_s, qr_s))
         posl = (24, 2)
         img_qr_big.paste(left_pic, posl)
 
-        right_pic = Image.open(dirname + "/media/right_pic.jpg").resize((qr_s, qr_s))
+        right_pic = Image.open("media/right_pic.jpg").resize((qr_s, qr_s))
         posr = (696 - qr_s - 24, 2)
         img_qr_big.paste(right_pic, posr)
     # this is used to paste logos if needed. Position is set empirically so that logos are aside of the qr-code
-    qrpic = dirname + "/output/" + time.ctime(time.time()).replace(" ", "_") + "qr.png"
+    qrpic = "output/" + time.ctime(time.time()).replace(" ", "_") + "qr.png"
     img_qr_big.save(qrpic)  # saving picture for further printing with a timestamp
 
     return qrpic
