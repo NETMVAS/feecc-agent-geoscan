@@ -2,6 +2,8 @@ from flask import Flask, request, Response
 from flask_restful import Api, Resource
 import typing as tp
 import logging
+import yaml
+from sys import exit
 
 from Agent import Agent
 from Passport import Passport
@@ -13,15 +15,41 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s: %(message)s"
 )
 
+
+def read_configuration() -> tp.Dict[str, tp.Dict[str, tp.Any]]:
+    """
+    :return: dictionary containing all the configurations
+    :rtype: dict
+
+    Reading config, containing all the required data, such as filepath, robonomics parameters (remote wss, seed),
+    camera parameters (ip, login, password, port), etc
+    """
+    config_path = "config/config.yaml"
+    logging.debug(f"Looking for config in {config_path}")
+
+    try:
+        with open(config_path) as f:
+            content = f.read()
+            config_f = yaml.load(content, Loader=yaml.FullLoader)
+            logging.debug(f"Configuration dict: {content}")
+            return config_f
+    except Exception as e:
+        while True:
+            logging.error("Error in configuration file!")
+            logging.error(e)
+            exit()
+
+
 logging.info('Agent API listener started')
 
 # global variables
 backend_api_address: str = "http://127.0.0.1:5000/api"
 valid_states = [0, 1, 2, 3]
+config: tp.Dict[str, tp.Dict[str, tp.Any]] = read_configuration()
 
 # instantiate objects
 passport = Passport("foo")
-agent = Agent()
+agent = Agent(config=config)
 agent.backend_api_address = backend_api_address
 app = Flask(__name__)
 api = Api(app)
@@ -44,6 +72,7 @@ class FormHandler(Resource):
 
         # validate the form and change own state
         if passport.submit_form(form_data):
+            agent.associated_passport = passport
             agent.state = 2
 
             logging.info(
