@@ -7,6 +7,13 @@ import subprocess
 from pinatapy import PinataPy
 from modules.url_generator import update_url
 
+# set up logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    # filename="agent.log",
+    format="%(asctime)s %(levelname)s: %(message)s"
+)
+
 
 class Error(Exception):
     pass
@@ -24,7 +31,7 @@ def concatenate(dirname: str, filename: str) -> str:
     concatenating two videos (intro with a main video) if needed. Intro is to be placed in media folder. More in config
     file
     """
-    logging.warning("Concatenating videos")
+    logging.info("Concatenating videos")
     if not os.path.exists(dirname + "/media/intro.mp4"):
         raise Error("Intro file doesn't exist!")
     concat_string = "file \'" + dirname + "/media/intro.mp4\'\nfile \'" + filename + "\'"
@@ -68,10 +75,10 @@ def _pin_to_pinata(filename: str, config: dict) -> None:
         pinata = PinataPy(pinata_api, pinata_secret_api)
         pinata.pin_file_to_ipfs(filename)  # here we actually send the entire file to pinata, not just its hash. It will
         # remain the same as if published locally, cause the content is the same.
-        logging.warning("File sent")
+        logging.info("File sent")
 
 
-def send(filename: str, keyword: str, qrpic: str, config: dict, dirname: str) -> None:
+def send(filename: str, keyword: str, qrpic: str, config: dict) -> None:
     """
     :param filename: full name of a recorded video
     :type filename: str
@@ -81,15 +88,13 @@ def send(filename: str, keyword: str, qrpic: str, config: dict, dirname: str) ->
     :type qrpic: str
     :param config: dictionary containing all the configurations
     :type config: dict
-    :param dirname: path to the project ending with .../cameras_robonomics
-    :type dirname: str
 
     concatenate if needed, publish files to ipfs locally, send them to pinata, push hashes to robonomics
     """
     if config["intro"]["enable"]:
         try:
             non_concatenated_filename = filename  # save old filename to delete if later
-            filename = concatenate(dirname, filename)  # get concatenated video filename
+            filename = filename  # get concatenated video filename
         except Exception as e:
             logging.error("Failed to concatenate. Error: ", e)
 
@@ -98,14 +103,14 @@ def send(filename: str, keyword: str, qrpic: str, config: dict, dirname: str) ->
             client = ipfshttpclient.connect()  # establish connection to local ipfs node
             res = client.add(filename)  # publish vide locally
             ipfs_hash = res["Hash"]  # get its hash of form Qm....
-            logging.warning("Published to IPFS, hash: " + ipfs_hash)
+            logging.info("Published to IPFS, hash: " + ipfs_hash)
             update_url(keyword, ipfs_hash, config)  # after publishing file in ipfs locally, which is pretty fast,
             # update the link on the qr code so that it redirects now to the gateway with a published file. It may
             # take some for the gateway node to find the file, so we need to pin it in pinata
             if config["pinata"]["enable"]:
-                logging.warning("Camera is sending file to pinata")
+                logging.info("Camera is sending file to Pinata")
                 _pin_to_pinata(filename, config)  # pin file in pinata if needed
-            logging.warning("Updating URL")
+            logging.info("Updating URL")
 
         except Exception as e:
             logging.error(
@@ -114,7 +119,7 @@ def send(filename: str, keyword: str, qrpic: str, config: dict, dirname: str) ->
 
     if config["general"]["delete_after_record"]:
         try:
-            logging.warning("Removing files")
+            logging.info("Removing files")
             os.remove(filename)
             os.remove(qrpic)
             if config["intro"]["enable"]:
@@ -133,7 +138,7 @@ def send(filename: str, keyword: str, qrpic: str, config: dict, dirname: str) ->
             )  # line of form  echo "Qm…" | ./robonomics io write datalog -s seed. See robonomics wiki for more
             process = subprocess.Popen(program, shell=True, stdout=subprocess.PIPE)
             output = process.stdout.readline()  # execute the command in shell and wait for it to complete
-            logging.warning(
+            logging.info(
                 "Published data to chain. Transaction hash is "
                 + output.strip().decode("utf8")
             )  # get transaction hash to use it further if needed
