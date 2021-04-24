@@ -1,0 +1,14 @@
+version: "3"
+
+volumes:
+  agent-storage:
+
+services:
+  robonomics_qa_agent:
+    build: .
+    ports:
+      - 8080:8080
+    environment:
+      - TZ=Europe/Moscow
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
