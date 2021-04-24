@@ -4,6 +4,7 @@ import uuid
 import csv
 import yaml
 import hashlib
+from datetime import datetime as dt
 
 # set up logging
 logging.basicConfig(
@@ -20,6 +21,7 @@ class Passport:
         # passport id and employee data based on employee ID
         self.passport_id: str = uuid.uuid4().hex
         self._employee_id: str = rfid_card_id
+        # noinspection PyTypeChecker
         self._employee_db_entry: tp.List[str] = self._find_in_db
 
         # refuse service if employee unknown
@@ -134,3 +136,9 @@ class Passport:
             logging.critical(f"File '{employee_db}' is not in the working directory, cannot retrieve employee data")
 
         return employee_data
+
+    def end_session(self, ipfs_hash: tp.List[str]) -> None:
+        """wrap up the session when video recording stops an save video data as well as session end timestamp"""
+
+        self.video_ipfs_hash += ipfs_hash
+        self.session_end_time = dt.now().strftime("%d-%m-%Y %H-%M-%S")
