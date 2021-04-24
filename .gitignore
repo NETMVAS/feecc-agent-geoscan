@@ -5,3 +5,4 @@ media/intro.mp4
 /venv/
 passports
 *.log
+/config/
