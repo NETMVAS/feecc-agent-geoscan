@@ -2,7 +2,7 @@ import ast
 import logging
 import requests
 
-from typing import Tuple, Any
+import typing as tp
 
 # set up logging
 logging.basicConfig(
@@ -12,7 +12,7 @@ logging.basicConfig(
 )
 
 
-def create_url(config: dict) -> Tuple[Any, Any]:
+def create_url(config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> tp.Tuple[tp.Any, tp.Any]:
     """
     :param config: dictionary containing all the configurations
     :type config: dict
@@ -43,7 +43,7 @@ def create_url(config: dict) -> Tuple[Any, Any]:
         return "55", "url.today/55"  # time to time creating url fails. To go on just set a dummy url and keyword
 
 
-def update_url(keyword: str, ipfs_hash: str, config: dict) -> None:
+def update_url(keyword: str, ipfs_hash: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
     """
     :param keyword: shorturl keyword. More on yourls.org. E.g. url.today/6b. 6b is a keyword
     :type keyword: str

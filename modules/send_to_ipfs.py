@@ -2,7 +2,7 @@ import ipfshttpclient
 import logging
 import os
 import subprocess
-
+import typing as tp
 
 from pinatapy import PinataPy
 from modules.url_generator import update_url
@@ -60,7 +60,7 @@ def concatenate(dirname: str, filename: str) -> str:
     return concat_filename  # return new filename
 
 
-def _pin_to_pinata(filename: str, config: dict) -> None:
+def _pin_to_pinata(filename: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
     """
     :param filename: full name of a recorded video
     :type filename: str
@@ -78,7 +78,7 @@ def _pin_to_pinata(filename: str, config: dict) -> None:
         logging.info("File sent")
 
 
-def send(filename: str, keyword: str, qrpic: str, config: dict) -> None:
+def send(filename: str, keyword: str, qrpic: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
     """
     :param filename: full name of a recorded video
     :type filename: str

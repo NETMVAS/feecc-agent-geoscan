@@ -2,6 +2,7 @@ import logging
 import subprocess
 import time
 from os import path
+import typing as tp
 
 # set up logging
 logging.basicConfig(
@@ -12,7 +13,7 @@ logging.basicConfig(
 
 
 class Camera:
-    def __init__(self, config: dict) -> None:
+    def __init__(self, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
         """
         :param config: dictionary containing all the configurations
         :type config: dict
@@ -30,9 +31,9 @@ class Camera:
         self.is_busy = False  # stating that in the beginning camera is not filming
         self.stop_record = False  # no stop filming flag raised
 
-    def record(self) -> str:
+    def record(self) -> tp.Generator:
         """
-        :param unit_uuid: UUID of a unit passport associated with a unit, which assembly
+        unit_uuid: UUID of a unit passport associated with a unit, which assembly
         process is being recorded by the camera
 
         main method to record video from camera. Uses popen and ffmpeg utility

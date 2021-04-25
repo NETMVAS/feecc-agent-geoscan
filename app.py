@@ -30,7 +30,7 @@ def read_configuration() -> tp.Dict[str, tp.Dict[str, tp.Any]]:
     try:
         with open(config_path) as f:
             content = f.read()
-            config_f = yaml.load(content, Loader=yaml.FullLoader)
+            config_f: tp.Dict[str, tp.Dict[str, tp.Any]] = yaml.load(content, Loader=yaml.FullLoader)
             logging.debug(f"Configuration dict: {content}")
             return config_f
     except Exception as e:
@@ -96,7 +96,7 @@ class FormHandler(Resource):
 class StateUpdateHandler(Resource):
     """handles a state update request"""
 
-    def post(self) -> int:
+    def post(self):
         logging.info(
             f"Received a request to update the state."
         )

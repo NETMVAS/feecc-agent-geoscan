@@ -1,10 +1,11 @@
 import qrcode
 import time
+import typing as tp
 
 from PIL import Image, ImageOps
 
 
-def create_qr(link: str, config: dict) -> str:
+def create_qr(link: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> str:
     """
     :param link: full yourls url. E.g. url.today/6b
     :type link: str
