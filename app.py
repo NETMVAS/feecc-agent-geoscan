@@ -48,7 +48,7 @@ valid_states = [0, 1, 2, 3]
 config: tp.Dict[str, tp.Dict[str, tp.Any]] = read_configuration()
 
 # instantiate objects
-passport = Passport("foo")
+passport = Passport("0008368511")
 agent = Agent(config=config)
 agent.backend_api_address = backend_api_address
 app = Flask(__name__)

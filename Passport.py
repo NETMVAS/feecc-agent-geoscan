@@ -21,8 +21,7 @@ class Passport:
         # passport id and employee data based on employee ID
         self.passport_id: str = uuid.uuid4().hex
         self._employee_id: str = rfid_card_id
-        # noinspection PyTypeChecker
-        self._employee_db_entry: tp.List[str] = self._find_in_db
+        self._employee_db_entry: tp.List[str] = self._find_in_db()
 
         # refuse service if employee unknown
         if not self._employee_db_entry:
