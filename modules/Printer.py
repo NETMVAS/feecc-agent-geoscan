@@ -7,7 +7,7 @@ from brother_ql.backends.helpers import send
 # set up logging
 logging.basicConfig(
     level=logging.DEBUG,
-    filename="agent.log",
+    # filename="agent.log",
     format="%(asctime)s %(levelname)s: %(message)s"
 )
 
