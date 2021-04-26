@@ -31,7 +31,7 @@ def create_qr(link: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> str:
     )  # position to insert to logo right in the center of a qr-code
 
     qr_s = 200  # size of the entire qr-code
-    border_s = int((696 - qr_s) / 2)  # 696 comes from a brother_ql label size accordance. Label of 62 mm corresponds to
+    border_s = int((554 - qr_s) / 2)  # 696 comes from a brother_ql label size accordance. Label of 62 mm corresponds to
     # 696 pixels picture size
     img_qr_big.paste(robonomics, pos)  # insert logo
     img_qr_big = img_qr_big.resize((qr_s, qr_s))  # resize qr
