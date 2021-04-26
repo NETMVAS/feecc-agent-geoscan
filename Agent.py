@@ -26,7 +26,7 @@ class Agent:
 
         self.state: int = 0
         self.config: tp.Dict[str, tp.Dict[str, tp.Any]] = config
-        self.backend_api_address: str = ''
+        self.backend_api_address: str = "127.0.0.1:8080/api"
         self.associated_passport: tp.Optional[Passport] = None
         self.associated_camera: Camera = Camera(self.config)
         self.latest_record_filename: str = ""
