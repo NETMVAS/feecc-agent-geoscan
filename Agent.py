@@ -29,7 +29,6 @@ class Agent:
         self.backend_api_address: str = ''
         self.associated_passport: tp.Optional[Passport] = None
         self.associated_camera: Camera = Camera(self.config)
-        self.record_video = self.associated_camera.record
         self.latest_record_filename: str = ""
         self.latest_record_short_link: str = ""
         self.latest_record_qrpic_filename: str = ""
@@ -52,7 +51,7 @@ class Agent:
         """
 
         # start the recording in the background and send the path to the video
-        self.latest_record_filename = self.record_video.send(self.associated_passport.passport_id)
+        self.latest_record_filename = self.associated_camera.start_record(self.associated_passport.passport_id)
 
     def state_3(self) -> None:
         """
@@ -63,7 +62,7 @@ class Agent:
         """
 
         # stop recording and save the file
-        next(self.record_video)
+        self.associated_camera.stop_record()
 
         # generate a video short link (a dummy for now)
         self.latest_record_short_link = url_generator.create_url(self.config)[1]
