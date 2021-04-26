@@ -4,6 +4,7 @@ import typing as tp
 import logging
 import yaml
 from sys import exit
+import threading
 
 from Agent import Agent
 from Passport import Passport
@@ -50,6 +51,7 @@ config: tp.Dict[str, tp.Dict[str, tp.Any]] = read_configuration()
 # instantiate objects
 passport = Passport("0008368511")
 agent = Agent(config=config)
+agent_thread = threading.Thread(target=agent.run)
 agent.backend_api_address = backend_api_address
 app = Flask(__name__)
 api = Api(app)
@@ -172,5 +174,6 @@ api.add_resource(StateUpdateHandler, "/api/state-update")
 api.add_resource(RFIDHandler, "/api/rfid")
 
 if __name__ == "__main__":
-    agent.run()
+    agent_thread.start()
     app.run(host="0.0.0.0", port=5000)
+    agent_thread.join()
