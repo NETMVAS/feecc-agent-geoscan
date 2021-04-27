@@ -75,11 +75,11 @@ class Passport:
         if form_keys == reference_form_keys:
             # convert timestamp
             session_start_time = dt.strptime(
-                date_string=form["session_start_time"],
-                format="%-m/%-d/%Y, %H:%M:%S %p"
+                form["session_start_time"],
+                "%-m/%-d/%Y, %H:%M:%S %p"
             )
 
-            session_start_time = dt.strftime(
+            session_start_time.strftime(
                 fmt="%d-%m-%Y %H-%M-%S"
             )
 
