@@ -51,7 +51,14 @@ class Agent:
         """
 
         # start the recording in the background and send the path to the video
-        self.latest_record_filename = self.associated_camera.start_record(self.associated_passport.passport_id)
+        try:
+            passport_id = self.associated_passport.passport_id
+        except AttributeError as E:
+            logging.error(
+                f"Failed to start video recording: error retrieving associated passport ID.\n\
+                self.associated_passport = {self.associated_passport}\n{E}")
+
+        self.latest_record_filename = self.associated_camera.start_record(passport_id)
 
     def state_3(self) -> None:
         """
