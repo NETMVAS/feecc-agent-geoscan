@@ -103,7 +103,7 @@ class Passport:
             "Доп. информация": self.additional_info,
             "Начало сборки": self.session_start_time,
             "Окончание сборки": self.session_end_time,
-            "Рабочее место": self.workplace_data,
+            # "Рабочее место": self.workplace_data,
             "Изготовил": employee_passport_code,
             "Видеозаписи процесса сборки в IPFS": self.video_ipfs_hash
         }
