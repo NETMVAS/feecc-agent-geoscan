@@ -44,7 +44,7 @@ def read_configuration() -> tp.Dict[str, tp.Dict[str, tp.Any]]:
 logging.info('Agent API listener started')
 
 # global variables
-backend_api_address: str = "http://127.0.0.1:5000/api"
+backend_api_address: str = "http://127.0.0.1:8080/api"
 valid_states = [0, 1, 2, 3]
 config: tp.Dict[str, tp.Dict[str, tp.Any]] = read_configuration()
 
