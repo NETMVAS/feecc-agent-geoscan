@@ -51,18 +51,10 @@ class Camera:
             filename.replace(f"video_{cnt}", f"video_{cnt + 1}")
             cnt += 1
 
-        program_ffmpeg = (
-                'ffmpeg -rtsp_transport tcp -i "rtsp://'  # using rtsp to get stream
-                + self.login
-                + ":"
-                + self.password
-                + "@"
-                + self.ip
-                + ":"
-                + self.port
-                + '/Streaming/Channels/101" -r 25 -c copy -map 0 '
-                + filename
-        )  # the entire line looks like
+        program_ffmpeg = \
+            f'ffmpeg -rtsp_transport tcp -i "rtsp://{self.login}:{self.password}@{self.ip}:{self.port}\
+/Streaming/Channels/101" -r 25 -c copy -map 0 {filename}'
+        # the entire line looks like
         # ffmpeg -rtsp_transport tcp -i "rtsp://login:password@ip:port/Streaming/Channels/101" -c copy -map 0 vid.mp4
         # more on ffmpeg.org
         self.process_ffmpeg = subprocess.Popen(
