@@ -73,17 +73,7 @@ class Passport:
         reference_form_keys.sort()
 
         if form_keys == reference_form_keys:
-            # convert timestamp
-            session_start_time = dt.strptime(
-                form["session_start_time"],
-                "%-m/%-d/%Y, %H:%M:%S %p"
-            )
-
-            session_start_time.strftime(
-                fmt="%d-%m-%Y %H-%M-%S"
-            )
-
-            self.session_start_time = session_start_time
+            self.session_start_time = form["session_start_time"],
             self.product_type = form["product_type"]
             self.additional_info = form["additional_info"]
             self.workplace_data = form["production_stage"]
