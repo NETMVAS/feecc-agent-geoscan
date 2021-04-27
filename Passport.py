@@ -76,7 +76,7 @@ class Passport:
             self.session_start_time = form["session_start_time"],
             self.product_type = form["product_type"]
             self.additional_info = form["additional_info"]
-            self.workplace_data = form["production_stage"]
+            # self.workplace_data = form["production_stage"]
 
             return True
 
