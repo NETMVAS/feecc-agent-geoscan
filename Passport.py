@@ -58,7 +58,7 @@ class Passport:
         reference_form = {
             "session_start_time": "01-01-1970 00:00:00",
             "product_type": "Perseverance Mars rover",
-            "production_stage": "Final assembly",
+            # "production_stage": "Final assembly",
             "additional_info":
                 {
                     "field_1": "Sample text",
@@ -73,7 +73,17 @@ class Passport:
         reference_form_keys.sort()
 
         if form_keys == reference_form_keys:
-            self.session_start_time = form["session_start_time"]
+            # convert timestamp
+            session_start_time = dt.strptime(
+                date_string=form["session_start_time"],
+                format="%-m/%-d/%Y, %H:%M:%S %p"
+            )
+
+            session_start_time = dt.strftime(
+                fmt="%d-%m-%Y %H-%M-%S"
+            )
+
+            self.session_start_time = session_start_time
             self.product_type = form["product_type"]
             self.additional_info = form["additional_info"]
             self.workplace_data = form["production_stage"]
