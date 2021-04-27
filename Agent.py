@@ -129,15 +129,21 @@ class Agent:
         """post an updated system state to the backend to keep it synced with the local state"""
 
         logging.info(f"Changing backend state to {self.state}")
-        change_backend_state = requests.post(
-            url=f"{self.backend_api_address}/state-update",
-            json={
+
+        target_url = f"{self.backend_api_address}/state-update"
+        payload = {
                 "change_state_to": self.state,
                 "priority": priority
             }
+
+        logging.debug(f"Sending request to:\n {target_url}\nWith payload:\n{payload}")
+
+        change_backend_state = requests.post(
+            url=target_url,
+            json=payload
         )
 
-        if change_backend_state.ok:
+        if change_backend_state.status_code == 200:
             logging.info(f"Send backend state transition request: success")
         else:
             logging.error(f"backend state transition request failed: HTTP code {change_backend_state.status_code}")
