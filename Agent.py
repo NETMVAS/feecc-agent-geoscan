@@ -113,6 +113,9 @@ class Agent:
                 elif self.state == 3:
                     self.state_3()
 
+                # report own state transition
+                logging.info(f"Agent state is now {self.state}")
+
                 # sync backend state with the own one
                 self._update_backend_state(priority=1)
 
