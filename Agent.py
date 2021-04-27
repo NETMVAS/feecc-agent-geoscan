@@ -130,6 +130,8 @@ class Agent:
 
         logging.info(f"Changing backend state to {self.state}")
 
+        logging.debug(f"self.backend_api_address = {self.backend_api_address}")
+
         target_url = f"{self.backend_api_address}/state-update"
         payload = {
                 "change_state_to": self.state,
