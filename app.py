@@ -50,6 +50,8 @@ config: tp.Dict[str, tp.Dict[str, tp.Any]] = read_configuration()
 
 # instantiate objects
 passport = Passport("0008368511")
+logging.debug(f"Created dummy passport: {passport}")
+
 agent = Agent(config=config)
 agent_thread = threading.Thread(target=agent.run)
 agent.backend_api_address = backend_api_address
@@ -148,6 +150,7 @@ class RFIDHandler(Resource):
             try:
                 global passport
                 passport = Passport(card_id)
+                logging.debug(f"Created passport for {card_id}: {passport}")
                 agent.state = 1
 
             except ValueError:
