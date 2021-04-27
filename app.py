@@ -49,9 +49,6 @@ valid_states = [0, 1, 2, 3]
 config: tp.Dict[str, tp.Dict[str, tp.Any]] = read_configuration()
 
 # instantiate objects
-passport = Passport("0008368511")
-logging.debug(f"Created dummy passport: {passport}")
-
 agent = Agent(config=config)
 agent_thread = threading.Thread(target=agent.run)
 agent.backend_api_address = backend_api_address
@@ -178,5 +175,10 @@ api.add_resource(RFIDHandler, "/api/rfid")
 
 if __name__ == "__main__":
     agent_thread.start()
+
+    # create dummy passport
+    passport = Passport("0008368511")
+    logging.debug(f"Created dummy passport: {passport}")
+
     app.run(host="127.0.0.1", port=5000)
     agent_thread.join()
