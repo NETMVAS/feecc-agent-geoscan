@@ -2,6 +2,7 @@ import requests
 import logging
 from time import sleep
 import typing as tp
+from sys import exit
 
 from modules.Camera import Camera
 import modules.Printer as Printer
@@ -57,6 +58,7 @@ class Agent:
             logging.error(
                 f"Failed to start video recording: error retrieving associated passport ID.\n\
                 self.associated_passport = {self.associated_passport}\n{E}")
+            exit()
 
         self.latest_record_filename = self.associated_camera.start_record(passport_id)
 
@@ -100,7 +102,7 @@ class Agent:
         """monitor own state and switch modes according to it's change"""
 
         # note latest known state
-        latest_state: int = self.state
+        latest_state: int = -1
 
         # monitor own state change
         while True:  # to be replaced with asyncio
