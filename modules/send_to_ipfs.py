@@ -101,12 +101,13 @@ def send(filename: str, keyword: str, qrpic: str, config: tp.Dict[str, tp.Dict[s
     if config["ipfs"]["enable"]:
         try:
             client = ipfshttpclient.connect()  # establish connection to local ipfs node
-            res = client.add(filename)  # publish vide locally
+            res = client.add(filename)  # publish video locally
             ipfs_hash = res["Hash"]  # get its hash of form Qm....
             logging.info("Published to IPFS, hash: " + ipfs_hash)
             update_url(keyword, ipfs_hash, config)  # after publishing file in ipfs locally, which is pretty fast,
             # update the link on the qr code so that it redirects now to the gateway with a published file. It may
             # take some for the gateway node to find the file, so we need to pin it in pinata
+
             if config["pinata"]["enable"]:
                 logging.info("Camera is sending file to Pinata")
                 _pin_to_pinata(filename, config)  # pin file in pinata if needed

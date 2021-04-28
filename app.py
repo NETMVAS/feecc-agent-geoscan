@@ -44,14 +44,16 @@ def read_configuration() -> tp.Dict[str, tp.Dict[str, tp.Any]]:
 logging.info('Agent API listener started')
 
 # global variables
-backend_api_address: str = "http://127.0.0.1:8080/api"
 valid_states = [0, 1, 2, 3]
 config: tp.Dict[str, tp.Dict[str, tp.Any]] = read_configuration()
+backend_api_address: str = config["api_address"]["backend_api_address"]
 
 # instantiate objects
 agent = Agent(config=config)
 agent_thread = threading.Thread(target=agent.run)
 agent.backend_api_address = backend_api_address
+passport = Passport("0008368511")
+logging.debug(f"Created dummy passport: {passport}")
 app = Flask(__name__)
 api = Api(app)
 
@@ -175,10 +177,5 @@ api.add_resource(RFIDHandler, "/api/rfid")
 
 if __name__ == "__main__":
     agent_thread.start()
-
-    # create dummy passport
-    passport = Passport("0008368511")
-    logging.debug(f"Created dummy passport: {passport}")
-
     app.run(host="127.0.0.1", port=5000)
     agent_thread.join()

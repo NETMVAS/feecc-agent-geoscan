@@ -26,9 +26,7 @@ class Camera:
         self.port = config["camera"]["port"]  # port where the camera streams, required for rtsp
         self.login = config["camera"]["login"]  # camera login to obtain access to the stream
         self.password = config["camera"]["password"]  # camera password to obtain access to the stream
-
-        self.initial_launch = True  # needed for the first launch for the situation if the trigger is in on position
-        self.is_busy = False  # stating that in the beginning camera is not filming
+        self.recording_ongoing: bool = False  # current status
         self.process_ffmpeg = None  # popen object o ffmpeg subprocess
 
     def start_record(self, unit_uuid: str) -> str:
@@ -66,11 +64,15 @@ class Camera:
         )
         logging.info(f"Started recording video '{filename}'")
 
+        self.recording_ongoing = True
+
         return filename
 
     def stop_record(self) -> None:
         """stop recording a video"""
 
-        logging.info(f"Finished recording video")
-        time.sleep(1)  # some time to finish the process
-        self.process_ffmpeg.kill()  # kill the subprocess to liberate system resources
+        if self.process_ffmpeg and self.recording_ongoing:
+            self.process_ffmpeg.terminate()  # kill the subprocess to liberate system resources
+            logging.info(f"Finished recording video")
+            self.recording_ongoing = False
+            time.sleep(1)  # some time to finish the process

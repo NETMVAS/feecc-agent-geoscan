@@ -27,7 +27,7 @@ class Agent:
 
         self.state: int = 0
         self.config: tp.Dict[str, tp.Dict[str, tp.Any]] = config
-        self.backend_api_address: str = "http://127.0.0.1:8080/api"
+        self.backend_api_address: str = config["api_address"]["backend_api_address"]
         self.associated_passport: tp.Optional[Passport] = None
         self.associated_camera: Camera = Camera(self.config)
         self.latest_record_filename: str = ""
@@ -82,8 +82,12 @@ class Agent:
             config=self.config
         )
 
-        # print the QR code onto a sticker
-        Printer.Task(picname=self.latest_record_qrpic_filename)
+        # print the QR code onto a sticker if set to do so in the config
+        if self.config["print_qr"]["enable"]:
+            Printer.Task(
+                picname=self.latest_record_qrpic_filename,
+                config=self.config
+            )
 
         # publish video into IPFS and pin to Pinata
         # update the short link to point to an actual recording

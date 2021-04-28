@@ -29,7 +29,7 @@ def create_url(config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> tp.Tuple[tp.Any, t
             "password": config["yourls"]["password"],
             "action": "shorturl",
             "format": "json",
-            "url": "http://gateway.ipfs.io",
+            "url": config["ipfs"]["gateway_address"],
         }  # api call to the yourls server. More on yourls.org
         payload = ""  # payload. Server creates a short url and returns it as a response
         response = requests.request("GET", url, data=payload, params=querystring)  # get the created url keyword.
@@ -61,7 +61,7 @@ def update_url(keyword: str, ipfs_hash: str, config: tp.Dict[str, tp.Dict[str, t
             "password": config["yourls"]["password"],
             "action": "update",
             "format": "json",
-            "url": "http://gateway.ipfs.io/ipfs/" + ipfs_hash,
+            "url": config["ipfs"]["gateway_address"] + ipfs_hash,
             "shorturl": keyword,
         }
         payload = ""  # another api call with no payload just to update the link. More on yourls.org. Call created with
