@@ -5,6 +5,7 @@ import csv
 import yaml
 import hashlib
 from datetime import datetime as dt
+import os
 
 # set up logging
 logging.basicConfig(
@@ -107,6 +108,10 @@ class Passport:
             "Изготовил": employee_passport_code,
             "Видеозаписи процесса сборки в IPFS": self.video_ipfs_hash
         }
+
+        # make directory if it is missing
+        if not os.path.isdir("unit-passports"):
+            os.mkdir("unit-passports")
 
         # save into a file
         with open(f"unit-passports/unit-passport-{self.passport_id}.yaml", "w") as passport_file:
