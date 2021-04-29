@@ -74,7 +74,7 @@ class Passport:
         reference_form_keys.sort()
 
         if form_keys == reference_form_keys:
-            self.session_start_time = form["session_start_time"][0],
+            self.session_start_time = str(form["session_start_time"]),
             self.product_type = form["product_type"]
             self.additional_info = form["additional_info"]
             self.workplace_data = form["production_stage"]
