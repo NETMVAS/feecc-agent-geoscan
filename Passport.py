@@ -74,7 +74,7 @@ class Passport:
         reference_form_keys.sort()
 
         if form_keys == reference_form_keys:
-            self.session_start_time = str(form["session_start_time"]),
+            self.session_start_time = form["session_start_time"],
             self.product_type = form["product_type"]
             self.additional_info = form["additional_info"]
             self.workplace_data = form["production_stage"]
@@ -98,6 +98,8 @@ class Passport:
         employee_passport_string_encoded = employee_passport_string.encode()
         employee_passport_code = hashlib.sha256(employee_passport_string_encoded).hexdigest()
 
+        logging.debug(f"self.session_start_time = {self.session_start_time}")
+
         passport_dict = {
             "Уникальный номер паспорта изделия": self.passport_id,
             "Модель изделия": self.product_type,
@@ -108,6 +110,8 @@ class Passport:
             "Изготовил": employee_passport_code,
             "Видеозаписи процесса сборки в IPFS": self.video_ipfs_hash
         }
+
+        logging.debug(f"raw passport_dict = {passport_dict}")
 
         # make directory if it is missing
         if not os.path.isdir("unit-passports"):
@@ -152,4 +156,4 @@ class Passport:
         for _hash in ipfs_hash:
             self.video_ipfs_hash.append(_hash)
 
-        self.session_end_time = dt.now().strftime("%d-%m-%Y %H-%M-%S")
+        self.session_end_time = dt.now().strftime("%d-%m-%Y %H:%M:%S")
