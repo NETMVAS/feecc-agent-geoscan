@@ -115,7 +115,11 @@ class Passport:
 
         # save into a file
         with open(f"unit-passports/unit-passport-{self.passport_id}.yaml", "w") as passport_file:
-            yaml.dump(passport_dict, passport_file)
+            yaml.dump(
+                passport_dict,
+                passport_file,
+                allow_unicode=True
+            )
 
         logging.info(f"Unit passport with UUID {self.passport_id} has been dumped successfully")
 
