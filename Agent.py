@@ -117,11 +117,6 @@ class Agent:
         while True:
             # detect change of the state
             if latest_state != self.state:
-                # report own state transition
-                logging.info(f"Agent state is now {self.state}")
-
-                # sync backend state with the own one
-                self._update_backend_state(priority=1)
 
                 # do state related actions when state switch detected
                 if self.state == 0:
@@ -134,7 +129,14 @@ class Agent:
                     self.state_2()
 
                 elif self.state == 3:
+                    self._update_backend_state(priority=1)
                     self.state_3()
+
+                # report own state transition
+                logging.info(f"Agent state is now {self.state}")
+
+                # sync backend state with the own one
+                self._update_backend_state(priority=1)
 
                 # update latest known state
                 latest_state = self.state
