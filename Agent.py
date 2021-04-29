@@ -99,7 +99,7 @@ class Agent:
         )
 
         # add video IPFS hash to the passport
-        self.associated_passport.end_session(ipfs_hash)
+        self.associated_passport.end_session([ipfs_hash])
 
         # save the passport into a file
         self.associated_passport.export_yaml()

@@ -149,5 +149,7 @@ class Passport:
     def end_session(self, ipfs_hash: tp.List[str]) -> None:
         """wrap up the session when video recording stops an save video data as well as session end timestamp"""
 
-        self.video_ipfs_hash += ipfs_hash
+        for _hash in ipfs_hash:
+            self.video_ipfs_hash.append(_hash)
+
         self.session_end_time = dt.now().strftime("%d-%m-%Y %H-%M-%S")
