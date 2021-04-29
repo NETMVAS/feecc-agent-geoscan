@@ -96,7 +96,7 @@ class Passport:
         # generate employee passport code
         employee_passport_string = " ".join(self._employee_db_entry)
         employee_passport_string_encoded = employee_passport_string.encode()
-        employee_passport_code = hashlib.sha256(employee_passport_string_encoded)
+        employee_passport_code = hashlib.sha256(employee_passport_string_encoded).hexdigest()
 
         passport_dict = {
             "Уникальный номер паспорта изделия": self.passport_id,
