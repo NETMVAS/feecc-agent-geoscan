@@ -91,14 +91,17 @@ class Agent:
 
         # publish video into IPFS and pin to Pinata
         # update the short link to point to an actual recording
-        ipfs.send(
+        ipfs_hash = ipfs.send(
             filename=self.latest_record_filename,
             qrpic=self.latest_record_qrpic_filename,
             config=self.config,
             keyword=self.latest_record_short_link.split('/')[-1]
         )
 
-        # save th passport into a file
+        # add video IPFS hash to the passport
+        self.associated_passport.end_session(ipfs_hash)
+
+        # save the passport into a file
         self.associated_passport.export_yaml()
 
         # change own state back to 0

@@ -74,10 +74,10 @@ class Passport:
         reference_form_keys.sort()
 
         if form_keys == reference_form_keys:
-            self.session_start_time = form["session_start_time"],
+            self.session_start_time = form["session_start_time"][0],
             self.product_type = form["product_type"]
             self.additional_info = form["additional_info"]
-            # self.workplace_data = form["production_stage"]
+            self.workplace_data = form["production_stage"]
 
             return True
 
@@ -118,7 +118,8 @@ class Passport:
             yaml.dump(
                 passport_dict,
                 passport_file,
-                allow_unicode=True
+                allow_unicode=True,
+                sort_keys=False
             )
 
         logging.info(f"Unit passport with UUID {self.passport_id} has been dumped successfully")

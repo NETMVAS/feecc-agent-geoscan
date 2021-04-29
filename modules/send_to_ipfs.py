@@ -78,7 +78,7 @@ def _pin_to_pinata(filename: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) ->
         logging.info("File sent")
 
 
-def send(filename: str, keyword: str, qrpic: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
+def send(filename: str, keyword: str, qrpic: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> str:
     """
     :param filename: full name of a recorded video
     :type filename: str
@@ -145,3 +145,5 @@ def send(filename: str, keyword: str, qrpic: str, config: tp.Dict[str, tp.Dict[s
             )  # get transaction hash to use it further if needed
         except Exception as e:
             logging.error("Error while sending IPFS hash to chain, error: ", e)
+
+        return ipfs_hash
