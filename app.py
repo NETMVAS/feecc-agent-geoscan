@@ -52,7 +52,7 @@ backend_api_address: str = config["api_address"]["backend_api_address"]
 agent = Agent(config=config)
 agent_thread = threading.Thread(target=agent.run)
 agent.backend_api_address = backend_api_address
-passport = Passport("0008368511")
+passport = Passport("0008368511", config)
 logging.debug(f"Created dummy passport: {passport}")
 app = Flask(__name__)
 api = Api(app)
@@ -148,7 +148,7 @@ class RFIDHandler(Resource):
             # create a passport for the provided employee
             try:
                 global passport
-                passport = Passport(card_id)
+                passport = Passport(card_id, config)
                 logging.debug(f"Created passport for {card_id}: {passport}")
                 agent.state = 1
 
