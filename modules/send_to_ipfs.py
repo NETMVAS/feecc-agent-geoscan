@@ -3,6 +3,7 @@ import logging
 import os
 import subprocess
 import typing as tp
+import threading
 
 from pinatapy import PinataPy
 from modules.url_generator import update_url
@@ -60,7 +61,7 @@ def concatenate(dirname: str, filename: str) -> str:
     return concat_filename  # return new filename
 
 
-def _pin_to_pinata(filename: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
+def pin_to_pinata(filename: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
     """
     :param filename: full name of a recorded video
     :type filename: str
@@ -75,10 +76,10 @@ def _pin_to_pinata(filename: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) ->
         pinata = PinataPy(pinata_api, pinata_secret_api)
         pinata.pin_file_to_ipfs(filename)  # here we actually send the entire file to pinata, not just its hash. It will
         # remain the same as if published locally, cause the content is the same.
-        logging.info("File sent")
+        logging.info("File published to Pinata")
 
 
-def send(filename: str, keyword: str, qrpic: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> str:
+def send(filename: str, config: tp.Dict[str, tp.Dict[str, tp.Any]], keyword: str = "", qrpic: str = "") -> str:
     """
     :param filename: full name of a recorded video
     :type filename: str
@@ -104,21 +105,32 @@ def send(filename: str, keyword: str, qrpic: str, config: tp.Dict[str, tp.Dict[s
             res = client.add(filename)  # publish video locally
             ipfs_hash = res["Hash"]  # get its hash of form Qm....
             logging.info("Published to IPFS, hash: " + ipfs_hash)
-            update_url(keyword, ipfs_hash, config)  # after publishing file in ipfs locally, which is pretty fast,
-            # update the link on the qr code so that it redirects now to the gateway with a published file. It may
-            # take some for the gateway node to find the file, so we need to pin it in pinata
+
+            if keyword:
+                logging.info("Updating URL")
+                update_url(keyword, ipfs_hash, config)
+                # after publishing file in ipfs locally, which is pretty fast,
+                # update the link on the qr code so that it redirects now to the gateway with a published file. It may
+                # take some for the gateway node to find the file, so we need to pin it in pinata
 
             if config["pinata"]["enable"]:
-                logging.info("Camera is sending file to Pinata")
-                _pin_to_pinata(filename, config)  # pin file in pinata if needed
-            logging.info("Updating URL")
+                logging.info("Camera is sending file to Pinata in the background")
+                
+                # create a thread for the function to run in
+                pinata_thread = threading.Thread(
+                    target=pin_to_pinata,
+                    args=(filename, config)
+                )
+                
+                # start the pinning operation
+                pinata_thread.start()
 
         except Exception as e:
             logging.error(
                 "Error while publishing to IPFS or pinning to pinata. Error: ", e
             )
 
-    if config["general"]["delete_after_record"]:
+    if config["general"]["delete_after_record"] and qrpic:
         try:
             logging.info("Removing files")
             os.remove(filename)
