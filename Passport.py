@@ -6,6 +6,7 @@ import yaml
 import hashlib
 from datetime import datetime as dt
 import os
+import modules.send_to_ipfs as ipfs
 
 # set up logging
 logging.basicConfig(
@@ -18,9 +19,11 @@ logging.basicConfig(
 class Passport:
     """handles form validation and unit passport issuing"""
 
-    def __init__(self, rfid_card_id: str) -> None:
+    def __init__(self, rfid_card_id: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
         # passport id and employee data based on employee ID
         self.passport_id: str = uuid.uuid4().hex
+        self.passport_ipfs_hash: str = ""
+        self.config = config
         self._employee_id: str = rfid_card_id
         self._employee_db_entry: tp.List[str] = self._find_in_db()
 
@@ -47,6 +50,7 @@ class Passport:
         self.product_type: str = ""
         self.additional_info: tp.Dict[str, str] = {}
         self.video_ipfs_hash: tp.List[str] = []
+        self.filename: str = ""
 
     def submit_form(self, form: tp.Dict[str, tp.Any]) -> bool:
         """
@@ -117,8 +121,9 @@ class Passport:
         if not os.path.isdir("unit-passports"):
             os.mkdir("unit-passports")
 
-        # save into a file
-        with open(f"unit-passports/unit-passport-{self.passport_id}.yaml", "w") as passport_file:
+        # save into a file and save the filename
+        self.filename = f"unit-passports/unit-passport-{self.passport_id}.yaml"
+        with open(self.filename, "w") as passport_file:
             yaml.dump(
                 passport_dict,
                 passport_file,
@@ -127,6 +132,18 @@ class Passport:
             )
 
         logging.info(f"Unit passport with UUID {self.passport_id} has been dumped successfully")
+
+        # upload passport file into IPFS and pin it to Pinata, publish hash to Robonomics
+        self.passport_ipfs_hash = ipfs.send(
+            filename=self.filename,
+            config=self.config
+        )
+
+        # also save passport IPFS hash locally in case Robonomics datalog is not written
+        with open("issued_passports.csv", "a") as file:
+            file.writelines(
+                f"{self.passport_id};{self.passport_ipfs_hash}\n"
+            )
 
     def _find_in_db(self) -> tp.List[str]:
         """:returns employee data, incl. name, position and employee ID if employee found in DB"""
