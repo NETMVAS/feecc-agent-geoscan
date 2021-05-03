@@ -1,31 +1,35 @@
 general:
-  delete_after_record: true #If you don't want to delete files from output folder, change to false.\
-  #Deleteing files from output folder doesn't delete them from IPFS
+  delete_after_record: false
 transaction:
-  path_to_robonomics_file: "" #where lies the binary file, ends with a binary filename. It's used to listen to network and sending datalog
-  remote: '' #e.g. '--remote ws://127.0.0.1:9944'. Specify remote web socket to some node.\
-  #If you are to use local network, leave empty
+  path_to_robonomics_file: "robonomics" #where lies the binary file, ends with a binary filename
+  remote: '--remote wss://earth.rpc.robonomics.network' #e.g. ws://127.0.0.1:9944
 camera:
-  ip: '' #Camera static IP
-  port: '' #Camera port e.g. 554
-  login: '' #Camera login
-  password: '' #Camera password
-  key: '' #secret seed (key) in parachain network
+  ip: '192.168.97.64'
+  port: '554'
+  login: 'admin'
+  password: 'qwerty12345'
+  key: '0xe63b7efe49222f4cd88826f7d7f777341899ea051f51fc249664d15d2216ddb1' #secret key in robonomics network
 print_qr:
   enable: true #If you use a printer and want to print a qr code
-  logos: true #if you want logos on left and right sides of a qr. Should be square pics. By default, there is an example
+  logos: false
+printer:
+  printer_model: "QL-800"
+  paper_width: 50 #paper width in mm
+  address: "usb://0x04f9:0x209b" #usually static
 yourls:
-  server: '' #visit yourls.org for more info
-  username: ''
-  password: ''
+  server: 'url.today'
+  username: 'vadim.manaenko'
+  password: 'yT8hH8aC4lB1yY4t'
 intro:
-  enable: true #If you want to attach an intro video to the main vid. Intro should be placed in media/intro.mp4. It should have the same
-  # framerate, resolution, etc as camera video. By default, there is a sample intro.
+  enable: false #If you want to attach an intro video to the main vid. Intro should be placed in media/intro.mp4
 pinata:
-  enable: true #If you want to send your video to pinning service. You should have an account on pinata.cloud
-  pinata_api: ""
-  pinata_secret_api: ""
+  enable: true
+  pinata_api: "65f04114913bffdf1baf"
+  pinata_secret_api: "85819ba3a7bf7c6ffc5d284f6175cf1c2b5e776afc173c44b7f6631f86a6e9dc"
 ipfs:
-  enable: true #If you want to publish you file to IPFS (basically you want to)
+  enable: true
+  gateway_address: "https://gateway.ipfs.io/ipfs/"
 datalog:
-  enable: true #If you want to send IPFS hash to blockchain (basically you want to)
+  enable: true
+api_address:
+  backend_api_address: "http://127.0.0.1:8080/api"

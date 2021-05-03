@@ -1,18 +1,17 @@
 import ast
 import logging
 import requests
-
 import typing as tp
 
 # set up logging
 logging.basicConfig(
-    level=logging.DEBUG,
-    # filename="agent.log",
+    level=logging.INFO,
+    filename="agent.log",
     format="%(asctime)s %(levelname)s: %(message)s"
 )
 
 
-def create_url(config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> tp.Tuple[tp.Any, tp.Any]:
+def generate_short_url(config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> tp.Tuple[tp.Any, tp.Any]:
     """
     :param config: dictionary containing all the configurations
     :type config: dict
@@ -43,7 +42,7 @@ def create_url(config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> tp.Tuple[tp.Any, t
         return "55", "url.today/55"  # time to time creating url fails. To go on just set a dummy url and keyword
 
 
-def update_url(keyword: str, ipfs_hash: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
+def update_short_url(keyword: str, ipfs_hash: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> None:
     """
     :param keyword: shorturl keyword. More on yourls.org. E.g. url.today/6b. 6b is a keyword
     :type keyword: str
@@ -52,8 +51,9 @@ def update_url(keyword: str, ipfs_hash: str, config: tp.Dict[str, tp.Dict[str, t
     :param config: dictionary containing all the configurations
     :type config: dict
 
-    Update redirecting service so that now the short url leads to gateway to a video in ipfs
+    Update redirecting service so that now the short url points to the  gateway to a video in ipfs
     """
+
     try:
         url = "https://" + config["yourls"]["server"] + "/yourls-api.php"
         querystring = {

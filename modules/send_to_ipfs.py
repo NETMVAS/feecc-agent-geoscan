@@ -6,18 +6,14 @@ import typing as tp
 import threading
 
 from pinatapy import PinataPy
-from modules.url_generator import update_url
+from modules.short_url_generator import update_short_url
 
 # set up logging
 logging.basicConfig(
-    level=logging.DEBUG,
-    # filename="agent.log",
+    level=logging.INFO,
+    filename="agent.log",
     format="%(asctime)s %(levelname)s: %(message)s"
 )
-
-
-class Error(Exception):
-    pass
 
 
 def concatenate(dirname: str, filename: str) -> str:
@@ -34,7 +30,7 @@ def concatenate(dirname: str, filename: str) -> str:
     """
     logging.info("Concatenating videos")
     if not os.path.exists(dirname + "/media/intro.mp4"):
-        raise Error("Intro file doesn't exist!")
+        raise Exception("Intro file doesn't exist!")
     concat_string = "file \'" + dirname + "/media/intro.mp4\'\nfile \'" + filename + "\'"
     # it should look like:
     #   file './media/intro.mp4'
@@ -108,7 +104,7 @@ def send(filename: str, config: tp.Dict[str, tp.Dict[str, tp.Any]], keyword: str
 
             if keyword:
                 logging.info("Updating URL")
-                update_url(keyword, ipfs_hash, config)
+                update_short_url(keyword, ipfs_hash, config)
                 # after publishing file in ipfs locally, which is pretty fast,
                 # update the link on the qr code so that it redirects now to the gateway with a published file. It may
                 # take some for the gateway node to find the file, so we need to pin it in pinata

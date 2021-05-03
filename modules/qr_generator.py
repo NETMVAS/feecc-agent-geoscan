@@ -1,7 +1,6 @@
 import qrcode
 import time
 import typing as tp
-
 from PIL import Image, ImageOps
 
 
@@ -16,6 +15,7 @@ def create_qr(link: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> str:
 
     This is a qr-creating submodule. Inserts a robonomics logo inside the qr and adds logos aside if required
     """
+
     inpic_s = 100  # size of robonomics logo in pixels
     robonomics = Image.open("media/robonomics.jpg").resize(
         (inpic_s, inpic_s)  # resize logo if it's not the demanded size

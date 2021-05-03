@@ -1,14 +1,13 @@
 import logging
 import typing as tp
-
 from PIL import Image
 from brother_ql import BrotherQLRaster, conversion
 from brother_ql.backends.helpers import send
 
 # set up logging
 logging.basicConfig(
-    level=logging.DEBUG,
-    # filename="agent.log",
+    level=logging.INFO,
+    filename="agent.log",
     format="%(asctime)s %(levelname)s: %(message)s"
 )
 

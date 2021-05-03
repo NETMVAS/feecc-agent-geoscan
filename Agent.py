@@ -7,14 +7,14 @@ from sys import exit
 from modules.Camera import Camera
 import modules.Printer as Printer
 import modules.send_to_ipfs as ipfs
-import modules.url_generator as url_generator
+import modules.short_url_generator as url_generator
 import modules.qr_generator as qr_generator
 from Passport import Passport
 
 # set up logging
 logging.basicConfig(
-    level=logging.DEBUG,
-    # filename="agent.log",
+    level=logging.INFO,
+    filename="agent.log",
     format="%(asctime)s %(levelname)s: %(message)s"
 )
 
@@ -74,7 +74,7 @@ class Agent:
         self.associated_camera.stop_record()
 
         # generate a video short link (a dummy for now)
-        self.latest_record_short_link = url_generator.create_url(self.config)[1]
+        self.latest_record_short_link = url_generator.generate_short_url(self.config)[1]
 
         # generate a QR code with the short link
         self.latest_record_qrpic_filename = qr_generator.create_qr(

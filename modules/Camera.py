@@ -6,8 +6,8 @@ import typing as tp
 
 # set up logging
 logging.basicConfig(
-    level=logging.DEBUG,
-    # filename="agent.log",
+    level=logging.INFO,
+    filename="agent.log",
     format="%(asctime)s %(levelname)s: %(message)s"
 )
 
