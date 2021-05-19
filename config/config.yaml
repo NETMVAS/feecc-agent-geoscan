@@ -1,35 +1,38 @@
 general:
-  delete_after_record: false
+  delete_after_record: false # Whether to delete local versions of videos after record or not
 transaction:
-  path_to_robonomics_file: "robonomics" #where lies the binary file, ends with a binary filename
-  remote: '--remote wss://earth.rpc.robonomics.network' #e.g. ws://127.0.0.1:9944
-camera:
-  ip: '192.168.97.64'
-  port: '554'
-  login: 'admin'
-  password: 'qwerty12345'
-  key: '0xe63b7efe49222f4cd88826f7d7f777341899ea051f51fc249664d15d2216ddb1' #secret key in robonomics network
-print_qr:
-  enable: true #If you use a printer and want to print a qr code
-  logos: false
-printer:
-  printer_model: "QL-800"
-  paper_width: 50 #paper width in mm
-  address: "usb://0x04f9:0x209b" #usually static
-yourls:
-  server: 'url.today'
-  username: 'vadim.manaenko'
-  password: 'yT8hH8aC4lB1yY4t'
-intro:
-  enable: false #If you want to attach an intro video to the main vid. Intro should be placed in media/intro.mp4
-pinata:
+  path_to_robonomics_file: "robonomics" # where lies the binary file, ends with a binary filename
+  remote: '--remote wss://earth.rpc.robonomics.network' # e.g. ws://127.0.0.1:9944
+camera: # Info about the used RTSP-capable IP camera
+  ip: '' # static IP of the camera
+  port: ''
+  login: ''
+  password: ''
+  key: '' # secret key in robonomics network
+print_qr: # Whether to print QR code stickers pointing to a video in IPFS
   enable: true
-  pinata_api: "65f04114913bffdf1baf"
-  pinata_secret_api: "85819ba3a7bf7c6ffc5d284f6175cf1c2b5e776afc173c44b7f6631f86a6e9dc"
+  logos: false # Enables logo insertion into a qrcode
+print_security_tag: # Whether to print seal tags with optional timestamp on them
+  enable: true
+  enable_timestamp: false
+printer: # Info about the Brother Label printer used in your operation
+  printer_model: "QL-800"
+  paper_width: 50 # paper width in mm
+  address: "usb://0x04f9:0x209b" # usually static
+yourls: # Information about the yourls node used for short link creation
+  server: ''
+  username: ''
+  password: ''
+intro:
+  enable: false # If you want to attach an intro video to the main vid. Intro should be placed in media/intro.mp4
+pinata:
+  enable: true # Enable pinning of files published to IPFS to Pinata
+  pinata_api: ""
+  pinata_secret_api: ""
 ipfs:
   enable: true
-  gateway_address: "https://gateway.ipfs.io/ipfs/"
+  gateway_address: "https://gateway.ipfs.io/ipfs/" # IPFS gateway to use when creating links
 datalog:
-  enable: true
+  enable: true # Whether to write certain data to Robonomics datalog or not
 api_address:
-  backend_api_address: "http://127.0.0.1:8080/api"
+  backend_api_address: "http://127.0.0.1:8080/api" # An address of the socket where the Backend is listening for API calls
