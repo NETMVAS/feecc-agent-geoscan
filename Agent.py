@@ -2,13 +2,12 @@ import requests
 import logging
 from time import sleep
 import typing as tp
-from sys import exit
 
 from modules.Camera import Camera
 import modules.Printer as Printer
 import modules.send_to_ipfs as ipfs
 import modules.short_url_generator as url_generator
-import modules.qr_generator as qr_generator
+import modules.image_generation as image_generation
 from Passport import Passport
 
 # set up logging
@@ -58,8 +57,34 @@ class Agent:
             logging.error(
                 f"Failed to start video recording: error retrieving associated passport ID.\n\
                 self.associated_passport = {self.associated_passport}\n{E}")
-            exit()
+            return
 
+        # generate a video short link (a dummy for now)
+        self.latest_record_short_link = url_generator.generate_short_url(self.config)[1]
+
+        # generate a QR code with the short link
+        self.latest_record_qrpic_filename = image_generation.create_qr(
+            link=self.latest_record_short_link,
+            config=self.config
+        )
+
+        # print the QR code onto a sticker if set to do so in the config
+        if self.config["print_qr"]["enable"]:
+            Printer.Task(
+                picname=self.latest_record_qrpic_filename,
+                config=self.config
+            )
+
+        # print the seal tag onto a sticker if set to do so in the config
+        if self.config["print_security_tag"]["enable"]:
+            seal_file_path = image_generation.create_seal_tag(self.config)
+
+            Printer.Task(
+                picname=seal_file_path,
+                config=self.config
+            )
+
+        # start recording a video
         self.latest_record_filename = self.associated_camera.start_record(passport_id)
 
     def state_3(self) -> None:
@@ -72,22 +97,6 @@ class Agent:
 
         # stop recording and save the file
         self.associated_camera.stop_record()
-
-        # generate a video short link (a dummy for now)
-        self.latest_record_short_link = url_generator.generate_short_url(self.config)[1]
-
-        # generate a QR code with the short link
-        self.latest_record_qrpic_filename = qr_generator.create_qr(
-            link=self.latest_record_short_link,
-            config=self.config
-        )
-
-        # print the QR code onto a sticker if set to do so in the config
-        if self.config["print_qr"]["enable"]:
-            Printer.Task(
-                picname=self.latest_record_qrpic_filename,
-                config=self.config
-            )
 
         # publish video into IPFS and pin to Pinata
         # update the short link to point to an actual recording

@@ -1,7 +1,9 @@
 import qrcode
 import time
+import os
 import typing as tp
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageDraw, ImageFont
+from datetime import datetime as dt
 
 
 def create_qr(link: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> str:
@@ -52,3 +54,73 @@ def create_qr(link: str, config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> str:
     img_qr_big.save(qrpic)  # saving picture for further printing with a timestamp
 
     return qrpic
+
+
+def create_seal_tag(config: tp.Dict[str, tp.Dict[str, tp.Any]]) -> str:
+    """
+    :param config: dictionary containing all the configurations
+    :type config: dict
+    :return: full filename of a resulted qr-code
+    :rtype: str
+
+    This is a qr-creating submodule. Inserts a robonomics logo inside the qr and adds logos aside if required
+    """
+
+    # figure out the filename
+    tag_timestamp = dt.now().strftime("%d.%m.%Y")
+    if config["print_security_tag"]["enable_timestamp"]:
+        seal_tag_path: str = f"output/seal_tag_{tag_timestamp}.png"
+    else:
+        seal_tag_path: str = f"output/seal_tag_base.png"
+        
+    # check if seal tag has already been created
+    if os.path.exists(seal_tag_path):
+        return seal_tag_path
+    
+    # make a basic security tag with needed dimensions
+    image_height = 200
+    image_width = 554
+    seal_tag_image = Image.new(
+        mode="RGB",
+        size=(image_width, image_height),
+        color=(255, 255, 255)
+    )
+    seal_tag_draw = ImageDraw.Draw(seal_tag_image)
+
+    # specify fonts
+    font_path = "media/helvetica-cyrillic-bold.ttf"
+
+    large_font = ImageFont.truetype(
+        font=font_path,
+        size=52
+    )
+
+    small_font = ImageFont.truetype(
+        font=font_path,
+        size=18
+    )
+
+    # add text to the image
+    seal_tag_draw.text(
+        xy=(20, 30),
+        text=u"ОПЛОМБИРОВАНО",
+        fill=(0, 0, 0),
+        font=large_font,
+        align="center"
+    )
+
+    # add a timestamp to the seal tag if needed
+    if config["print_security_tag"]["enable_timestamp"]:
+        seal_tag_draw.text(
+            xy=(20, 82),
+            text=tag_timestamp,
+            fill=(0, 0, 0),
+            font=large_font,
+            align="center"
+        )
+
+    # save the image in the output folder
+    seal_tag_image.save(seal_tag_path)
+
+    # return a relative path to the image
+    return seal_tag_path
